@@ -29,6 +29,8 @@ int main (int argc, char **argv) {
     char *block[2], *buffer;
     int index = 0, count = -1;
 
+    FILE *fp;
+
     // buffers must be aligned for O_DIRECT.
     posix_memalign((void **)&(block[0]), ALIGNMENT, BLOCK_SIZE);
     posix_memalign((void **)&(block[1]), ALIGNMENT, BLOCK_SIZE);
@@ -59,8 +61,12 @@ int main (int argc, char **argv) {
             perror("lseek(r)");
         else if (read(d, buffer, BLOCK_SIZE) != BLOCK_SIZE)
             perror("read");
-        else if (memcmp(block[index], buffer, BLOCK_SIZE))
-            fprintf(stderr, "memcmp: test failed\n");
+        else if (memcmp(block[index], buffer, BLOCK_SIZE)) {
+            fp = fopen("test.log", "a");
+            fprintf(fp, "memcmp: test failed\n");
+            fprintf(fp, "%d\n", count);
+            fclose(fp);
+        }
         else
             continue;
 
